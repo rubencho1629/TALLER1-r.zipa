@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Detalles de la Guardería</title>
+</head>
+<body>
+<div class="container">
+    <h1 class="mt-5">Detalles de la Guardería: {{ results[0].Guarderia_Nombre if results else '' }}</h1>
+    <a class="btn btn-primary mb-3" href="/">Regresar a inicio</a>
+
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>Guardería ID</th>
+            <th>Guardería Nombre</th>
+            <th>Dirección</th>
+            <th>Teléfono</th>
+            <th>Cuidador ID</th>
+            <th>Cuidador Nombre</th>
+            <th>Cuidador Teléfono</th>
+            <th>Perro ID</th>
+            <th>Perro Nombre</th>
+            <th>Raza</th>
+            <th>Edad</th>
+            <th>Peso</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for row in results %}
+            <tr>
+                <td>{{ row.Guarderia_ID }}</td>
+                <td>{{ row.Guarderia_Nombre }}</td>
+                <td>{{ row.Guarderia_Direccion }}</td>
+                <td>{{ row.Guarderia_Telefono }}</td>
+                <td>{{ row.Cuidador_ID }}</td>
+                <td>{{ row.Cuidador_Nombre }}</td>
+                <td>{{ row.Cuidador_Telefono }}</td>
+                <td>{{ row.Perro_ID }}</td>
+                <td>{{ row.Perro_Nombre }}</td>
+                <td>{{ row.Perro_Raza }}</td>
+                <td>{{ row.Perro_Edad }}</td>
+                <td>{{ row.Perro_Peso }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
