@@ -21,4 +21,5 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # Importar controladores
-from .controllers import controllers
+from .controllers.controllers import *  # Importa todas las rutas de controllers.py
+from .controllers.user_controllers import *  # Importa todas las rutas de user_controllers.py
