@@ -1,36 +1,63 @@
-from flask import request, jsonify
-from .. import db,app
-from ..models.usuario  import Usuario
+from flask import request, redirect, url_for, render_template, flash, jsonify
+from flask_login import login_user, logout_user, login_required
+from werkzeug.security import check_password_hash, generate_password_hash
+from ..models.usuario import Usuario
+from .. import app, db
 
-# Ruta para obtener todos los usuarios
-@app.route('/usuarios', methods=['GET'])
-def get_usuarios():
-    usuarios = Usuario.query.all()
-    return jsonify([{'id': u.id, 'username': u.username} for u in usuarios])
 
-# Ruta para crear un nuevo usuario
-@app.route('/usuarios', methods=['POST'])
-def create_usuario():
-    data = request.json
-    nuevo_usuario = Usuario(username=data['username'], password=data['password'])
-    db.session.add(nuevo_usuario)
-    db.session.commit()
-    return jsonify({'id': nuevo_usuario.id, 'username': nuevo_usuario.username}), 201
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
 
-# Ruta para obtener un usuario específico por ID
-@app.route('/usuarios/<int:id>', methods=['GET'])
-def get_usuario(id):
-    usuario = Usuario.query.get(id)
-    if usuario is None:
-        return jsonify({'error': 'Usuario no encontrado'}), 404
-    return jsonify({'id': usuario.id, 'username': usuario.username})
+        # Verificar si el usuario ya existe
+        existing_user = Usuario.query.filter_by(username=username).first()
+        if existing_user:
+            return jsonify({"message": "El nombre de usuario ya existe."}), 400
 
-# Ruta para eliminar un usuario
-@app.route('/usuarios/<int:id>', methods=['DELETE'])
-def delete_usuario(id):
-    usuario = Usuario.query.get(id)
-    if usuario is None:
-        return jsonify({'error': 'Usuario no encontrado'}), 404
-    db.session.delete(usuario)
-    db.session.commit()
-    return jsonify({'message': 'Usuario eliminado'})
+        # Crear nuevo usuario
+        new_user = Usuario(username=username, password=generate_password_hash(password))
+        db.session.add(new_user)
+        db.session.commit()
+
+        return jsonify({"message": "Registro exitoso"}), 201
+
+    return render_template('register.html')
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        if request.is_json:
+            data = request.get_json()
+            username = data.get('username')
+            password = data.get('password')
+        else:
+            username = request.form.get('username')
+            password = request.form.get('password')
+
+        user = Usuario.query.filter_by(username=username).first()
+
+        if user and check_password_hash(user.password, password):
+            login_user(user)
+            flash('Inicio de sesión exitoso', 'success')
+            return redirect(url_for('index'))  # Redirige al index
+        else:
+            flash('Usuario o contraseña incorrectos', 'danger')
+            return redirect(url_for('login'))
+
+    return render_template('login/login.html')
+
+
+# Ruta para el cierre de sesión
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('Has cerrado sesión', 'info')
+    return redirect(url_for('login'))
+
+# Ruta para el dashboard
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    return render_template('login/dashboard.html', mensaje="¡Bienvenido a tu panel de control!")
